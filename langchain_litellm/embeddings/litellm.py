@@ -65,7 +65,11 @@ class LiteLLMEmbeddings(BaseModel, Embeddings):
     """API key for the provider."""
 
     api_base: Optional[str] = None
-    """Base URL for the API endpoint."""
+    """Base URL for the API endpoint.
+
+    Also accepts ``base_url`` as an alias. A non-None ``api_base`` wins;
+    ``base_url`` fills in when ``api_base`` is unset or None, so a config built
+    from ``os.getenv`` still reaches the endpoint."""
 
     api_version: Optional[str] = None
     """API version (e.g. for Azure)."""
@@ -109,7 +113,12 @@ class LiteLLMEmbeddings(BaseModel, Embeddings):
     @model_validator(mode="before")
     @classmethod
     def _normalize_base_url_alias(cls, values: Any) -> Any:
-        """Accept base_url as a runtime alias for api_base."""
+        """Accept base_url as a runtime alias for api_base.
+
+        Keyed on the VALUE, not key presence: ``api_base=None`` is the field's
+        own default, so treating it as "supplied" would silently drop base_url
+        for every config assembled from ``os.getenv``.
+        """
         if not isinstance(values, dict):
             return values
 

@@ -113,6 +113,8 @@ class LiteLLMEmbeddings(BaseModel, Embeddings):
         if not isinstance(values, dict):
             return values
 
+        # Copy before popping: the caller still owns the dict they passed.
+        values = dict(values)
         base_url = values.pop("base_url", None)
         if base_url is not None and values.get("api_base") is None:
             values["api_base"] = base_url
